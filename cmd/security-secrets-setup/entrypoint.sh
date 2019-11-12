@@ -40,7 +40,7 @@ fi
 
 posthook=""
 if [ "$1" = 'security-secrets-setup' ]; then
-    posthook="chown -R 100:1000 /run/edgex/secrets/edgex-vault/"
+    posthook="chown -R 100:1000 /run/edgex/secrets/edgex-vault/ /vault/init/"
 fi
 
 echo "Executing $@"

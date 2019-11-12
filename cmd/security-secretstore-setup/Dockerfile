@@ -29,4 +29,9 @@ COPY --from=builder /edgex-go/cmd/security-secretstore-setup/res/docker/configur
 
 COPY --from=builder /edgex-go/cmd/security-secretstore-setup/security-secretstore-setup .
 
+# Create assets folder (needed for unseal keys, root token)
+# 100:1000 is the uid / gid for vault
+RUN mkdir -p /vault/config/assets && \
+    chown 100:1000 -R /vault
+
 ENTRYPOINT ["./security-secretstore-setup","--init=true"]

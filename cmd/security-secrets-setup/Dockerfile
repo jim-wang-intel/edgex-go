@@ -58,7 +58,8 @@ RUN apk update && apk add ca-certificates dumb-init \
 ENV BASE_DIR=/edgex/security-secrets-setup
 
 WORKDIR $BASE_DIR
-RUN mkdir res
+RUN mkdir res && \
+    mkdir -p /vault/init
 
 # Vault PKI/TLS setup/config binary
 COPY --from=build-env /edgex-go/cmd/security-secrets-setup/security-secrets-setup .
@@ -68,6 +69,11 @@ COPY --from=build-env /edgex-go/cmd/security-secrets-setup/res/configuration.tom
 COPY --from=build-env /edgex-go/cmd/security-secrets-setup/res/pkisetup-vault.json ./res
 # Kong PKI/TLS materials
 COPY --from=build-env /edgex-go/cmd/security-secrets-setup/res/pkisetup-kong.json ./res
+
+# Vault's startup script
+VOLUME /vault/init
+COPY --from=build-env /edgex-go/cmd/security-secrets-setup/start_vault.sh /vault/init
+RUN chmod +x /vault/init/start_vault.sh
 
 # setup the entry point script
 # it uses `dumb-init` as the top-level process to reap any
