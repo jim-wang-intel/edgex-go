@@ -70,7 +70,9 @@ services:
       - consul-data:/consul/data
       - consul-scripts:/consul/scripts
       - vault-config:/vault/config
-      - /run/edgex/secrets:/run/edgex/secrets:ro    
+      - /run/edgex/secrets/ca:/run/edgex/secrets/ca:ro
+      - /run/edgex/secrets/edgex-vault:/run/edgex/secrets/edgex-vault:ro
+      - /run/edgex/secrets/edgex-kong:/run/edgex/secrets/edgex-kong:ro
     depends_on:
       - volume
 
@@ -103,10 +105,11 @@ services:
       - "8200:8200"
     cap_add:
       - "IPC_LOCK"
+    tmpfs:
+      - /vault/config
     entrypoint: ["/vault/init/start_vault.sh"]
     environment:
       - VAULT_ADDR=https://edgex-vault:8200
-      - VAULT_LOCAL_CONFIG=${VAULT_LOCAL_CONFIG}
       - VAULT_CONFIG_DIR=/vault/config
       - VAULT_UI=true
     volumes:
@@ -140,10 +143,6 @@ services:
     image: edgexfoundry/docker-edgex-security-secretstore-setup-go:1.1.1-dev
     container_name: edgex-vault-worker
     hostname: edgex-vault-worker
-    entrypoint: >
-      /bin/sh -c 
-      "until /consul/scripts/consul-svc-healthy.sh security-secrets-setup; do sleep 1; done;
-      /security-secretstore-setup --init=true --vaultInterval=10"
     networks:
       edgex-network:
         aliases:

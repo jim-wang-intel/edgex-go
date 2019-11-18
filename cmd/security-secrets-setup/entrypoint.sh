@@ -26,7 +26,8 @@ set -e
 # runtime directory is set per user:
 XDG_RUNTIME_DIR=${XDG_RUNTIME_DIR:-/run/user/$(echo $(id -u))}
 PATH="$BASE_DIR:$PATH"
-export XDG_RUNTIME_DIR PATH
+VAULT_TLS_PATH=${VAULT_TLS_PATH:-/run/edgex/secrets/edgex-vault}
+export XDG_RUNTIME_DIR PATH VAULT_TLS_PATH
 
 # debug output:
 echo XDG_RUNTIME_DIR $XDG_RUNTIME_DIR
@@ -38,12 +39,21 @@ if [ "$1" = 'generate' -o "$1" = 'cache' -o "$1" = 'import' -o "$1" = 'legacy' ]
     set -- security-secrets-setup "$@"
 fi
 
+instvaultscript=""
 posthook=""
 if [ "$1" = 'security-secrets-setup' ]; then
-    posthook="chown -R 100:1000 /run/edgex/secrets/edgex-vault/ /vault/init/"
+    # update the start_vault script for vault starting
+    instvaultscript="mv /vault/staging/start_vault.sh /vault/init/start_vault.sh"
+    # grant permissions of folders for vault:vault
+    posthook="chown -R 100:1000 ${VAULT_TLS_PATH}"
 fi
 
 echo "Executing $@"
 "$@"
-echo "Executing hook=$posthook"
-$posthook
+
+if [ "$1" = 'security-secrets-setup' ]; then
+    echo "Installing Vault's startup script"
+    $instvaultscript
+    echo "Executing hook=$posthook"
+    $posthook
+fi
