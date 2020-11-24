@@ -1,0 +1,15 @@
+[Writable]
+LogLevel = 'DEBUG'
+
+[StageGate]
+BootstrapperHost = "edgex-security-installer"
+BootstrapPort = 54321
+VaultWorkerHost = "edgex-vault-worker"
+TokensReadyPort = 54322
+ReadyToRunPort = 54323
+RedisHost = "edgex-redis"
+RedisReadyPort = 6379
+ConsulHost = "edgex-core-consul"
+ConsulReadyPort = 8500
+PostgresHost = "kong-db"
+PostgresReadyPort = 5432
